@@ -1,6 +1,5 @@
 package com.BridgeLabs.addressBookProgram;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -23,16 +22,16 @@ public class AddressBook implements ManageAddressBook {
 	public String name;
 	public List<Contact> contacts;
 	public Map<String, Contact> nameToContactMap;
-	public Map<String, ArrayList<Contact>> cityToContactsMap;
-	public Map<String, ArrayList<Contact>> stateToContactsMap;
+	public Map<String, List<Contact>> cityToContactsMap;
+	public Map<String, List<Contact>> stateToContactsMap;
 
 	public AddressBook(String name) {
 		super();
 		this.name = name;
 		this.contacts = new LinkedList<Contact>();
 		this.nameToContactMap = new LinkedHashMap<String, Contact>();
-		this.cityToContactsMap = new HashMap<>();
-		this.stateToContactsMap = new HashMap<>();
+		this.cityToContactsMap = new LinkedHashMap<>();
+		this.stateToContactsMap = new LinkedHashMap<>();
 	}
 
 	public void addContacts() {
@@ -148,14 +147,14 @@ public class AddressBook implements ManageAddressBook {
 	 * uc9 Method to map list of contacts to cities and states in this address book
 	 */
 	public void generateContactsListByCityAndState() {
-		this.cityToContactsMap = new HashMap<>();
-		this.stateToContactsMap = new HashMap<>();
+		this.cityToContactsMap = new LinkedHashMap<>();
+		this.stateToContactsMap = new LinkedHashMap<>();
 		for (Contact contact : contacts) {
 			String cityName = contact.getCity();
 			if (cityToContactsMap.containsKey(cityName)) {
 				cityToContactsMap.get(cityName).add(contact);
 			} else {
-				ArrayList<Contact> cityContactsList = new ArrayList<Contact>();
+				List<Contact> cityContactsList = new LinkedList<Contact>();
 				cityContactsList.add(contact);
 				cityToContactsMap.put(cityName, cityContactsList);
 			}
@@ -163,7 +162,7 @@ public class AddressBook implements ManageAddressBook {
 			if (stateToContactsMap.containsKey(stateName)) {
 				stateToContactsMap.get(stateName).add(contact);
 			} else {
-				ArrayList<Contact> stateContactsList = new ArrayList<Contact>();
+				List<Contact> stateContactsList = new LinkedList<Contact>();
 				stateContactsList.add(contact);
 				stateToContactsMap.put(stateName, stateContactsList);
 			}
