@@ -40,8 +40,7 @@ public class AddressBook implements ManageAddressBook {
 			logger.debug("1.Add next Contact\n2.Exit\nEnter your choice: ");
 			int choice1 = Integer.parseInt(sc.nextLine());
 			if (choice1 == 1) {
-				logger.debug(
-						"Enter the fields in order: \nfirst_name\nlastname\naddress\ncity\nstate\nzip\nphone no.\nemail");
+				logger.debug("Enter the fields in order: \nfirst_name\nlastname\naddress\ncity\nstate\nzip\nphone no.\nemail");
 				Contact contact = new Contact(sc.nextLine(), sc.nextLine(), sc.nextLine(), sc.nextLine(), sc.nextLine(),
 						Integer.parseInt(sc.nextLine()), Long.parseLong(sc.nextLine()), sc.nextLine());
 				if (checkDuplicacy(contact)) {
@@ -75,30 +74,36 @@ public class AddressBook implements ManageAddressBook {
 	}
 
 	public void editContact() {
-		logger.debug("Enter name of person whose contact details are to be edited: ");
-		String name = sc.nextLine();
-		logger.debug("Enter the new fields in order: \naddress\ncity\nstate\nzip\nphone no.\nemail");
-		try {
-			nameToContactMap.get(name).setAddress(sc.nextLine());
-			nameToContactMap.get(name).setCity(sc.nextLine());
-			nameToContactMap.get(name).setState(sc.nextLine());
-			nameToContactMap.get(name).setZip(Integer.parseInt(sc.nextLine()));
-			nameToContactMap.get(name).setPhoneNumber(Long.parseLong(sc.nextLine()));
-			nameToContactMap.get(name).setEmail(sc.nextLine());
-		} catch (NullPointerException e) {
-			logger.debug("No contact found with that name.");
-		}
+		do {
+			logger.debug("Enter name of person whose contact details are to be edited: ");
+			String name = sc.nextLine();
+			logger.debug("Enter the new fields in order: \naddress\ncity\nstate\nzip\nphone no.\nemail");
+			try {
+				Contact toBeEditedContact=nameToContactMap.get(name);
+				toBeEditedContact.setAddress(sc.nextLine());
+				toBeEditedContact.setCity(sc.nextLine());
+				toBeEditedContact.setState(sc.nextLine());
+				toBeEditedContact.setZip(Integer.parseInt(sc.nextLine()));
+				toBeEditedContact.setPhoneNumber(Long.parseLong(sc.nextLine()));
+				toBeEditedContact.setEmail(sc.nextLine());
+				logger.debug("Contact after editing:\n"+toBeEditedContact);
+			} catch (NullPointerException e) {
+				logger.debug("No contact found with that name.");
+			}
+			logger.debug("Enter 1 to edit another contact, else enter 0: ");
+		} while (Integer.parseInt(sc.nextLine()) == 1);
 	}
 
 	public void deleteContact() {
-		logger.debug("Enter the name of Contact person to be deleted: ");
-		String name = sc.nextLine();
-		try {
-			contacts.remove(nameToContactMap.get(name));
+		do {
+			logger.debug("Enter the name of Contact person to be deleted: ");
+			String name = sc.nextLine();
+			Contact toBeDeletedContact=nameToContactMap.get(name);
+			contacts.remove(toBeDeletedContact);
 			nameToContactMap.remove(name);
-		} catch (NullPointerException e) {
-			logger.debug("No contact found with that name.");
-		}
+			logger.debug("Address Book after deletion of contact: \n" + this);
+			logger.debug("Enter 1 to delete another contact, else enter 0: ");
+		} while (Integer.parseInt(sc.nextLine()) == 1);
 	}
 
 	public static void addAddressBooks() {
@@ -250,24 +255,14 @@ public class AddressBook implements ManageAddressBook {
 			AddressBook addressBook = nameToAddressBookMap.get(sc.nextLine());
 			if (addressBook == null) {
 				logger.debug("No address book found with that name.");
-				;
 			} else {
 				addressBook.addContacts();
 				logger.debug(addressBook);
-				logger.debug("Before edit:");
-				for (Contact contact : addressBook.contacts) {
-					logger.debug(contact);
-				}
 				addressBook.editContact();
-				logger.debug("After edit");
-				for (Contact contact : addressBook.contacts) {
-					logger.debug(contact);
-				}
 				addressBook.deleteContact();
-				logger.debug("After deletion of contact: \n" + addressBook);
 				addressBook.generateContactsListByCityAndState();
 			}
-			logger.debug("Enter 1 to continue with another address book");
+			logger.debug("Enter 1 to continue with another address book, else enter 0: ");
 		} while (Integer.parseInt(sc.nextLine()) == 1);
 		getPersonsByCityOrState();
 		viewPersonsByCityOrState();
