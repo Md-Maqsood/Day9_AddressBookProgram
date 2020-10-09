@@ -58,7 +58,8 @@ public class AddressBook implements ManageAddressBook {
 	}
 
 	/**
-	 * uc7
+	 * uc7 Method to check if a duplicate of given contact is already present in
+	 * this address book
 	 * 
 	 * @param contact
 	 * @return
@@ -117,7 +118,7 @@ public class AddressBook implements ManageAddressBook {
 	}
 
 	/**
-	 * uc8
+	 * uc8 Method to search all contacts in a given city/state in all address books
 	 */
 	public static void getPersonsByCityOrState() {
 		logger.debug("Choose \n1 To search by city\n2 To search by state\nEnter your choice: ");
@@ -139,9 +140,11 @@ public class AddressBook implements ManageAddressBook {
 	}
 
 	/**
-	 * uc9
+	 * uc9 Method to map list of contacts to cities and states in this address book
 	 */
 	public void generateContactsListByCityAndState() {
+		this.cityToContactsMap = new HashMap<>();
+		this.stateToContactsMap = new HashMap<>();
 		for (Contact contact : contacts) {
 			String cityName = contact.getCity();
 			if (cityToContactsMap.containsKey(cityName)) {
@@ -163,13 +166,14 @@ public class AddressBook implements ManageAddressBook {
 	}
 
 	/**
-	 * uc9
+	 * uc9 Method to display all contacts in all cities/states in all address books
 	 */
 	public static void viewPersonsByCityOrState() {
 		logger.debug("Choose \n1 To view by city\n2 To view by state\nEnter your choice: ");
 		SearchBy viewByParameter = (Integer.parseInt(sc.nextLine()) == 1) ? SearchBy.CITY : SearchBy.STATE;
 		for (String addressBookName : nameToAddressBookMap.keySet()) {
 			AddressBook addressBook = nameToAddressBookMap.get(addressBookName);
+			addressBook.generateContactsListByCityAndState();
 			logger.debug("In the address book " + addressBookName);
 			logger.debug("");
 			for (String cityOrStateName : (viewByParameter == SearchBy.CITY ? addressBook.cityToContactsMap.keySet()
@@ -181,6 +185,54 @@ public class AddressBook implements ManageAddressBook {
 					logger.debug(contact);
 				}
 				logger.debug("");
+			}
+			logger.debug("");
+		}
+	}
+
+	/**
+	 * uc10 Method to get total no. of contacts by city in this address book
+	 * 
+	 * @return
+	 */
+	public Map<String, Integer> getCountByCity() {
+		Map<String, Integer> contactsCount = new HashMap<String, Integer>();
+		for (String cityName : cityToContactsMap.keySet()) {
+			contactsCount.put(cityName, cityToContactsMap.get(cityName).size());
+		}
+		return contactsCount;
+	}
+
+	/**
+	 * uc10 Method to get total no. of contacts by state in this address book
+	 * 
+	 * @return
+	 */
+	public Map<String, Integer> getCountByState() {
+		Map<String, Integer> contactsCount = new HashMap<String, Integer>();
+		for (String stateName : stateToContactsMap.keySet()) {
+			contactsCount.put(stateName, stateToContactsMap.get(stateName).size());
+		}
+		return contactsCount;
+	}
+
+	/**
+	 * uc10 Method to display no. of contacts by city and state in all address books
+	 */
+	public static void displayCountByCityAndState() {
+		for (String addressBookName : nameToAddressBookMap.keySet()) {
+			AddressBook addressBook = nameToAddressBookMap.get(addressBookName);
+			logger.debug("In the address book " + addressBookName);
+			logger.debug("");
+			Map<String, Integer> countByCity = addressBook.getCountByCity();
+			logger.debug("Contact counts by city");
+			for (String cityName : countByCity.keySet()) {
+				logger.debug(cityName + ": " + countByCity.get(cityName));
+			}
+			Map<String, Integer> countByState = addressBook.getCountByState();
+			logger.debug("\nContact counts by state");
+			for (String stateName : countByState.keySet()) {
+				logger.debug(stateName + ": " + countByState.get(stateName));
 			}
 			logger.debug("");
 		}
@@ -219,6 +271,7 @@ public class AddressBook implements ManageAddressBook {
 		} while (Integer.parseInt(sc.nextLine()) == 1);
 		getPersonsByCityOrState();
 		viewPersonsByCityOrState();
+		displayCountByCityAndState();
 		sc.close();
 	}
 
