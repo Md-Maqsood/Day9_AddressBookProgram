@@ -1,5 +1,6 @@
 package com.BridgeLabs.addressBookProgram;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -22,12 +23,16 @@ public class AddressBook implements ManageAddressBook {
 	public String name;
 	public List<Contact> contacts;
 	public Map<String, Contact> nameToContactMap;
+	public Map<String, ArrayList<Contact>> cityToContactsMap;
+	public Map<String, ArrayList<Contact>> stateToContactsMap;
 
 	public AddressBook(String name) {
 		super();
 		this.name = name;
 		this.contacts = new LinkedList<Contact>();
 		this.nameToContactMap = new LinkedHashMap<String, Contact>();
+		this.cityToContactsMap = new HashMap<>();
+		this.stateToContactsMap = new HashMap<>();
 	}
 
 	public void addContacts() {
@@ -115,7 +120,7 @@ public class AddressBook implements ManageAddressBook {
 	 * uc8
 	 */
 	public static void getPersonsByCityOrState() {
-		logger.debug("Choose \n1 To seach by city\n2 To search by state\nEnter your choice: ");
+		logger.debug("Choose \n1 To search by city\n2 To search by state\nEnter your choice: ");
 		SearchBy searchByParameter = (Integer.parseInt(sc.nextLine()) == 1) ? SearchBy.CITY : SearchBy.STATE;
 		logger.debug("Enter the name of " + searchByParameter.name() + ": ");
 		String cityOrStateName = sc.nextLine();
@@ -128,6 +133,54 @@ public class AddressBook implements ManageAddressBook {
 						.equals(cityOrStateName)) {
 					logger.debug(contact);
 				}
+			}
+			logger.debug("");
+		}
+	}
+
+	/**
+	 * uc9
+	 */
+	public void generateContactsListByCityAndState() {
+		for (Contact contact : contacts) {
+			String cityName = contact.getCity();
+			if (cityToContactsMap.containsKey(cityName)) {
+				cityToContactsMap.get(cityName).add(contact);
+			} else {
+				ArrayList<Contact> cityContactsList = new ArrayList<Contact>();
+				cityContactsList.add(contact);
+				cityToContactsMap.put(cityName, cityContactsList);
+			}
+			String stateName = contact.getState();
+			if (stateToContactsMap.containsKey(stateName)) {
+				stateToContactsMap.get(stateName).add(contact);
+			} else {
+				ArrayList<Contact> stateContactsList = new ArrayList<Contact>();
+				stateContactsList.add(contact);
+				stateToContactsMap.put(stateName, stateContactsList);
+			}
+		}
+	}
+
+	/**
+	 * uc9
+	 */
+	public static void viewPersonsByCityOrState() {
+		logger.debug("Choose \n1 To view by city\n2 To view by state\nEnter your choice: ");
+		SearchBy viewByParameter = (Integer.parseInt(sc.nextLine()) == 1) ? SearchBy.CITY : SearchBy.STATE;
+		for (String addressBookName : nameToAddressBookMap.keySet()) {
+			AddressBook addressBook = nameToAddressBookMap.get(addressBookName);
+			logger.debug("In the address book " + addressBookName);
+			logger.debug("");
+			for (String cityOrStateName : (viewByParameter == SearchBy.CITY ? addressBook.cityToContactsMap.keySet()
+					: addressBook.stateToContactsMap.keySet())) {
+				logger.debug(viewByParameter.name() + ": " + cityOrStateName);
+				for (Contact contact : (viewByParameter == SearchBy.CITY
+						? addressBook.cityToContactsMap.get(cityOrStateName)
+						: addressBook.stateToContactsMap.get(cityOrStateName))) {
+					logger.debug(contact);
+				}
+				logger.debug("");
 			}
 			logger.debug("");
 		}
@@ -160,10 +213,12 @@ public class AddressBook implements ManageAddressBook {
 				}
 				addressBook.deleteContact();
 				logger.debug("After deletion of contact: \n" + addressBook);
+				addressBook.generateContactsListByCityAndState();
 			}
 			logger.debug("Enter 1 to continue with another address book");
 		} while (Integer.parseInt(sc.nextLine()) == 1);
 		getPersonsByCityOrState();
+		viewPersonsByCityOrState();
 		sc.close();
 	}
 
