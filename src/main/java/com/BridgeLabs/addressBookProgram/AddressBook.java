@@ -377,7 +377,7 @@ class Contact {
 	public boolean equals(Object obj) {
 		Contact checkContact = (Contact) obj;
 		return (checkContact.getFirstName().equals(this.firstName))
-				&& (checkContact.getLastName().contentEquals(this.lastName));
+				&& (checkContact.getLastName().equals(this.lastName));
 	}
 
 }
