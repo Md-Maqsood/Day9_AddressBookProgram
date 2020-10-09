@@ -11,6 +11,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class AddressBook implements ManageAddressBook {
+
+	public enum SearchBy {
+		CITY, STATE
+	}
+
 	private static final Logger logger = LogManager.getLogger(AddressBook.class);
 	static Scanner sc = new Scanner(System.in);
 	static Map<String, AddressBook> nameToAddressBookMap = new HashMap<String, AddressBook>();
@@ -49,6 +54,7 @@ public class AddressBook implements ManageAddressBook {
 
 	/**
 	 * uc7
+	 * 
 	 * @param contact
 	 * @return
 	 */
@@ -66,19 +72,27 @@ public class AddressBook implements ManageAddressBook {
 		logger.debug("Enter name of person whose contact details are to be edited: ");
 		String name = sc.nextLine();
 		logger.debug("Enter the new fields in order: \naddress\ncity\nstate\nzip\nphone no.\nemail");
-		nameToContactMap.get(name).setAddress(sc.nextLine());
-		nameToContactMap.get(name).setCity(sc.nextLine());
-		nameToContactMap.get(name).setState(sc.nextLine());
-		nameToContactMap.get(name).setZip(Integer.parseInt(sc.nextLine()));
-		nameToContactMap.get(name).setPhoneNumber(Long.parseLong(sc.nextLine()));
-		nameToContactMap.get(name).setEmail(sc.nextLine());
+		try {
+			nameToContactMap.get(name).setAddress(sc.nextLine());
+			nameToContactMap.get(name).setCity(sc.nextLine());
+			nameToContactMap.get(name).setState(sc.nextLine());
+			nameToContactMap.get(name).setZip(Integer.parseInt(sc.nextLine()));
+			nameToContactMap.get(name).setPhoneNumber(Long.parseLong(sc.nextLine()));
+			nameToContactMap.get(name).setEmail(sc.nextLine());
+		} catch (NullPointerException e) {
+			logger.debug("No contact found with that name.");
+		}
 	}
 
 	public void deleteContact() {
 		logger.debug("Enter the name of Contact person to be deleted: ");
 		String name = sc.nextLine();
-		contacts.remove(nameToContactMap.get(name));
-		nameToContactMap.remove(name);
+		try {
+			contacts.remove(nameToContactMap.get(name));
+			nameToContactMap.remove(name);
+		} catch (NullPointerException e) {
+			logger.debug("No contact found with that name.");
+		}
 	}
 
 	public static void addAddressBooks() {
@@ -97,6 +111,28 @@ public class AddressBook implements ManageAddressBook {
 		}
 	}
 
+	/**
+	 * uc8
+	 */
+	public static void getPersonsByCityOrState() {
+		logger.debug("Choose \n1 To seach by city\n2 To search by state\nEnter your choice: ");
+		SearchBy searchByParameter = (Integer.parseInt(sc.nextLine()) == 1) ? SearchBy.CITY : SearchBy.STATE;
+		logger.debug("Enter the name of " + searchByParameter.name() + ": ");
+		String cityOrStateName = sc.nextLine();
+		for (String addressBookName : nameToAddressBookMap.keySet()) {
+			AddressBook addressBook = nameToAddressBookMap.get(addressBookName);
+			logger.debug("Persons in the " + searchByParameter.name() + " " + cityOrStateName + " in the address book "
+					+ addressBookName + " are: ");
+			for (Contact contact : addressBook.contacts) {
+				if ((searchByParameter == SearchBy.CITY ? contact.getCity() : contact.getState())
+						.equals(cityOrStateName)) {
+					logger.debug(contact);
+				}
+			}
+			logger.debug("");
+		}
+	}
+
 	@Override
 	public String toString() {
 		return "Address Book " + name + " with " + contacts.size() + (contacts.size() == 1 ? " contact" : " contacts");
@@ -104,26 +140,30 @@ public class AddressBook implements ManageAddressBook {
 
 	public static void main(String[] args) {
 		addAddressBooks();
-		logger.debug("Enter the name of the address book to continue: ");
-		AddressBook addressBook = nameToAddressBookMap.get(sc.nextLine());
-		if (addressBook == null) {
-			logger.debug("No address book found with that name.");
-			;
-		} else {
-			addressBook.addContacts();
-			logger.debug(addressBook);
-			logger.debug("Before edit:");
-			for (Contact contact : addressBook.contacts) {
-				logger.debug(contact);
+		do {
+			logger.debug("Enter the name of the address book to continue: ");
+			AddressBook addressBook = nameToAddressBookMap.get(sc.nextLine());
+			if (addressBook == null) {
+				logger.debug("No address book found with that name.");
+				;
+			} else {
+				addressBook.addContacts();
+				logger.debug(addressBook);
+				logger.debug("Before edit:");
+				for (Contact contact : addressBook.contacts) {
+					logger.debug(contact);
+				}
+				addressBook.editContact();
+				logger.debug("After edit");
+				for (Contact contact : addressBook.contacts) {
+					logger.debug(contact);
+				}
+				addressBook.deleteContact();
+				logger.debug("After deletion of contact: \n" + addressBook);
 			}
-			addressBook.editContact();
-			logger.debug("After edit");
-			for (Contact contact : addressBook.contacts) {
-				logger.debug(contact);
-			}
-			addressBook.deleteContact();
-			logger.debug("After deletion of contact: \n" + addressBook);
-		}
+			logger.debug("Enter 1 to continue with another address book");
+		} while (Integer.parseInt(sc.nextLine()) == 1);
+		getPersonsByCityOrState();
 		sc.close();
 	}
 
